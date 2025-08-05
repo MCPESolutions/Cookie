@@ -45,7 +45,7 @@ void drawRoundedRectangle(const Vec4<float>& rect, const UIColor& color, float r
 void fillRoundedRectangle(const Vec4<float>& rect, const UIColor& color, float radius = 5.f);
 void fillRect(const Vec2<float>& pos, const Vec2<float>& size, const UIColor& color);
 float getTime();
-void drawImage(const Vec4<float>& rect, const std::string& url);
+void drawImage(const Vec4<float>& rect, const std::string& url, float opacity);
 void drawTriangle(const Vec4<float>& rect, const UIColor& color, bool leftDirection, bool filled);
 void drawPause(const Vec4<float>& rect, const UIColor& color);
 Vec2<float> WorldToScreen(const Vec3<float>& worldPos, const Vec2<float>& screenSize);
@@ -106,7 +106,7 @@ static bool saveImageData(const std::string& imageData, const std::string& image
 static std::string downloadAndCacheImageFromUrl(const std::string& url,
                                                 const std::string& customName);
 static bool isValidImageUrl(const std::string& url);
-static void drawPlaceholder(const Vec4<float>& rect, const std::string& text);
+static void drawPlaceholder(const Vec4<float>& rect, const std::string& text, float opacity);
 
 void drawImageFromUrl(const Vec4<float>& rect, const std::string& url,
                       const std::string& customName, float opacity);

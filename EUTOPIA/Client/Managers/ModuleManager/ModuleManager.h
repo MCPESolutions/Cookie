@@ -4,7 +4,7 @@
 #include "Modules/Category/Client/CustomFont.h"
 #include "Modules/Category/Client/Hud.h"
 #include "Modules/Category/Client/ArrayList.h"
-
+#include "Modules/Category/Client/0x92.h"
 //Player
 #include "Modules/Category/Player/BlockReach.h"
 #include "Modules/Category/Player/Offhand.h"
@@ -26,6 +26,8 @@
 #include "Modules/Category/Movement/Velocity.h"
 #include "Modules/Category/Movement/NoSlow.h"
 #include "Modules/Category/Movement/Fly.h"
+#include "Modules/Category/Movement/AutoSprint.h"
+#include "Modules/Category/Movement/BunnyHop.h"
 #include "Modules/Category/Movement/Phase.h"
 
 //Render

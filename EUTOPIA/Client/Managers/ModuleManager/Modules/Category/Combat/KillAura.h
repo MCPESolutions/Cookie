@@ -33,5 +33,6 @@ class KillAura : public Module {
     virtual void onDisable() override;
     virtual void onNormalTick(LocalPlayer* localPlayer) override;
     virtual void onUpdateRotation(LocalPlayer* localPlayer) override;
+    virtual void onSendPacket(Packet* packet) override;
     std::string getModeText() override;
 };

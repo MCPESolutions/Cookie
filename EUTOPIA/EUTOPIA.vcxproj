@@ -156,6 +156,7 @@
     <ClCompile Include="Client\Managers\HooksManager\Hooks\Network\PacketReceiveHook.cpp" />
     <ClCompile Include="Client\Managers\HooksManager\Hooks\World\Actor\ActorModelHook.cpp" />
     <ClCompile Include="Client\Managers\ModuleManager\ModuleManager.cpp" />
+    <ClCompile Include="Client\Managers\ModuleManager\Modules\Category\Client\0x81.cpp" />
     <ClCompile Include="Client\Managers\ModuleManager\Modules\Category\Client\ArrayList.cpp" />
     <ClCompile Include="Client\Managers\ModuleManager\Modules\Category\Client\ClickGUI.cpp" />
     <ClCompile Include="Client\Managers\ModuleManager\Modules\Category\Client\CustomFont.cpp" />
@@ -167,6 +168,8 @@
     <ClCompile Include="Client\Managers\ModuleManager\Modules\Category\Combat\Reach.cpp" />
     <ClCompile Include="Client\Managers\ModuleManager\Modules\Category\Misc\NoPacket.cpp" />
     <ClCompile Include="Client\Managers\ModuleManager\Modules\Category\Misc\Timer.cpp" />
+    <ClCompile Include="Client\Managers\ModuleManager\Modules\Category\Movement\AutoSprint.cpp" />
+    <ClCompile Include="Client\Managers\ModuleManager\Modules\Category\Movement\BunnyHop.cpp" />
     <ClCompile Include="Client\Managers\ModuleManager\Modules\Category\Movement\Fly.cpp" />
     <ClCompile Include="Client\Managers\ModuleManager\Modules\Category\Movement\NoSlow.cpp" />
     <ClCompile Include="Client\Managers\ModuleManager\Modules\Category\Movement\Phase.cpp" />
@@ -211,6 +214,7 @@
     <ClCompile Include="SDK\Render\BaseActorRenderContext.cpp" />
     <ClCompile Include="SDK\World\Actor\Actor.cpp" />
     <ClCompile Include="SDK\World\Inventory\PlayerInventory.cpp" />
+    <ClCompile Include="SDK\World\Level\Level.cpp" />
     <ClCompile Include="SDK\World\Level\LevelData.h" />
     <ClCompile Include="Utils\AnimationUtil.cpp" />
     <ClCompile Include="Utils\ChatClient.cpp" />
@@ -291,10 +295,12 @@
     <ClInclude Include="Client\Managers\HooksManager\Hooks\World\GameMode\StopDestroyBlockHook.h" />
     <ClInclude Include="Client\Managers\HooksManager\Hooks\World\Level\LevelTickHook.h" />
     <ClInclude Include="Client\Managers\ModuleManager\ModuleManager.h" />
+    <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Client\0x92.h" />
     <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Client\ArrayList.h" />
     <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Client\ClickGUI.h" />
     <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Client\CustomFont.h" />
     <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Client\Hud.h" />
+    <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Client\xorstr.h" />
     <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Combat\BowSpam.h" />
     <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Combat\Criticals.h" />
     <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Combat\Hitbox.h" />
@@ -302,6 +308,8 @@
     <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Combat\Reach.h" />
     <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Misc\NoPacket.h" />
     <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Misc\Timer.h" />
+    <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Movement\AutoSprint.h" />
+    <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Movement\BunnyHop.h" />
     <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Movement\Fly.h" />
     <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Movement\NoSlow.h" />
     <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Movement\Phase.h" />

@@ -1,6 +1,5 @@
 #pragma once
 //Entry point in player
-
 #include <string>
 #include <cstdint>
 #include <unordered_map>
@@ -11,8 +10,10 @@
 #include "../../Core/mce.h"
 #include "LevelData.h"
 #include "../Actor/Components/ActorUniqueIDComponent.h"
+#include "../Actor/Components/ActorTypeComponent.h"
 
 class Actor;
+
 struct Wrapper {
     uint8_t pad[0x10];
     void* ptrToT;
@@ -84,4 +85,5 @@ HitResult* getHitResult() {
 	return MemoryUtil::callVirtualFunc<HitResult*>(319, this);
 }
 
+Actor* getEntityById(Level* level, uint32_t id);
 };

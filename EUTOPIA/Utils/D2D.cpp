@@ -416,34 +416,96 @@ bool D2D::ScreenChange(std::string& from,std::string &to) {
     return false;
 }
 
+void fillTriangle(const Vec2<float>& p1, const Vec2<float>& p2, const Vec2<float>& p3,
+                       const UIColor& color) {
+    D2D_CTX_GUARD();
+    ID2D1SolidColorBrush* colorBrush = getSolidColorBrush(color);
+
+    ID2D1PathGeometry* pathGeometry = nullptr;
+    d2dFactory->CreatePathGeometry(&pathGeometry);
+
+    ID2D1GeometrySink* sink = nullptr;
+    if(pathGeometry) {
+        pathGeometry->Open(&sink);
+        if(sink) {
+            sink->BeginFigure(D2D1::Point2F(p1.x, p1.y), D2D1_FIGURE_BEGIN_FILLED);
+            sink->AddLine(D2D1::Point2F(p2.x, p2.y));
+            sink->AddLine(D2D1::Point2F(p3.x, p3.y));
+            sink->EndFigure(D2D1_FIGURE_END_CLOSED);
+            sink->Close();
+            sink->Release();
+        }
+        d2dDeviceContext->FillGeometry(pathGeometry, colorBrush);
+        pathGeometry->Release();
+    }
+}
+
 Vec2<float> SecretMethodAwA(const Vec2<float>& a, const Vec2<float>& b, float t) {
     return Vec2<float>(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t);
 }
 void RenderUI() {
-    static Vec2<float> smoothMousePos = Vec2<float>(0.f, 0.f);
+    static Vec2<float> smoothMousePos(0.f, 0.f);
+    static float lastChangeTime = 0.f;
+    static int selectedIndex = 0;
+    static int previousIndex = 0;
+    static bool initialized = false;
 
     std::string screenName = GI::getClientInstance()->getScreenName();
     Vec2<float> windowsSize = GI::getGuiData()->windowSizeReal;
+
+static std::vector<std::string> backgroundUrls = {
+        "https://raw.githubusercontent.com/MCPESolutions/Cookie-Dependencies/"
+        "53d6f10bf61ff4d5f83e30267522b34b2536dbed/Unblurred1.jpg",
+        "https://raw.githubusercontent.com/MCPESolutions/Cookie-Dependencies/"
+        "35cc928942ff395bae91cdb8912d42f0953a908e/Unblurred2.jpg",
+        "https://raw.githubusercontent.com/MCPESolutions/Cookie-Dependencies/"
+        "e7fa7e23a60ebe0e4a78a91eedde92204329d53b/Unblurred3.jpg"};
+
+    static std::vector<std::string> backgroundNames = {"background0", "background1", "background2"};
+
+    if(!initialized) {
+        Vec4<float> offscreenRect(-1000.f, -1000.f, -900.f, -900.f);
+        for(size_t i = 0; i < backgroundUrls.size(); i++) {
+            D2D::drawImageFromUrl(offscreenRect, backgroundUrls[i], backgroundNames[i], 0.f);
+        }
+        initialized = true;
+    }
+
+    float currentTime = static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(
+                                               std::chrono::steady_clock::now().time_since_epoch())
+                                               .count()) /
+                        1000.f;
 
     float lerpFactor = 0.01f;
     Vec2<float> targetMousePos(D2D::mpos.x, D2D::mpos.y);
     smoothMousePos = SecretMethodAwA(smoothMousePos, targetMousePos, lerpFactor);
 
-    Vec4<float> StartbuttonSize = Vec4<float>(
-        windowsSize.x / 2 - windowsSize.x * 0.0859, windowsSize.y * 0.540 - windowsSize.y * 0.031,
-        windowsSize.x / 2 + windowsSize.x * 0.0859, windowsSize.y * 0.540 + windowsSize.y * 0.031);
+    float buttonHeight = windowsSize.y * 0.071f;
+    float buttonOffset = (windowsSize.y < 720.f) ? -buttonHeight : 0.f;
 
-    Vec4<float> SettingsButtonSize = Vec4<float>(
-        windowsSize.x / 2 - windowsSize.x * 0.0859, windowsSize.y * 0.611 - windowsSize.y * 0.031,
-        windowsSize.x / 2 + windowsSize.x * 0.0859, windowsSize.y * 0.611 + windowsSize.y * 0.031);
+    Vec4<float> StartbuttonSize =
+        Vec4<float>(windowsSize.x / 2 - windowsSize.x * 0.0859f,
+                    windowsSize.y * 0.540f - windowsSize.y * 0.031f + buttonOffset,
+                    windowsSize.x / 2 + windowsSize.x * 0.0859f,
+                    windowsSize.y * 0.540f + windowsSize.y * 0.031f + buttonOffset);
 
-    Vec4<float> RealmsButtonSize = Vec4<float>(
-        windowsSize.x / 2 - windowsSize.x * 0.0859, windowsSize.y * 0.682 - windowsSize.y * 0.031,
-        windowsSize.x / 2 + windowsSize.x * 0.0859, windowsSize.y * 0.682 + windowsSize.y * 0.031);
+    Vec4<float> SettingsButtonSize =
+        Vec4<float>(windowsSize.x / 2 - windowsSize.x * 0.0859f,
+                    windowsSize.y * 0.611f - windowsSize.y * 0.031f + buttonOffset,
+                    windowsSize.x / 2 + windowsSize.x * 0.0859f,
+                    windowsSize.y * 0.611f + windowsSize.y * 0.031f + buttonOffset);
 
-    Vec4<float> ScamplaceButtonSize = Vec4<float>(
-        windowsSize.x / 2 - windowsSize.x * 0.0859, windowsSize.y * 0.753 - windowsSize.y * 0.031,
-        windowsSize.x / 2 + windowsSize.x * 0.0859, windowsSize.y * 0.753 + windowsSize.y * 0.031);
+    Vec4<float> RealmsButtonSize =
+        Vec4<float>(windowsSize.x / 2 - windowsSize.x * 0.0859f,
+                    windowsSize.y * 0.682f - windowsSize.y * 0.031f + buttonOffset,
+                    windowsSize.x / 2 + windowsSize.x * 0.0859f,
+                    windowsSize.y * 0.682f + windowsSize.y * 0.031f + buttonOffset);
+
+    Vec4<float> ScamplaceButtonSize =
+        Vec4<float>(windowsSize.x / 2 - windowsSize.x * 0.0859f,
+                    windowsSize.y * 0.753f - windowsSize.y * 0.031f + buttonOffset,
+                    windowsSize.x / 2 + windowsSize.x * 0.0859f,
+                    windowsSize.y * 0.753f + windowsSize.y * 0.031f + buttonOffset);
 
     bool isInStartButtonAera =
         (D2D::mpos.x >= StartbuttonSize.x && D2D::mpos.x <= StartbuttonSize.z &&
@@ -457,101 +519,183 @@ void RenderUI() {
         (D2D::mpos.x >= RealmsButtonSize.x && D2D::mpos.x <= RealmsButtonSize.z &&
          D2D::mpos.y >= RealmsButtonSize.y && D2D::mpos.y <= RealmsButtonSize.w);
 
-    bool isInScamplaceButtonAera = (D2D::mpos.x >= ScamplaceButtonSize.x &&
-                                    D2D::mpos.x <= ScamplaceButtonSize.z &&
-                                    D2D::mpos.y >= ScamplaceButtonSize.y &&
-                                    D2D::mpos.y <= ScamplaceButtonSize.w);
+    bool isInScamplaceButtonAera =
+        (D2D::mpos.x >= ScamplaceButtonSize.x && D2D::mpos.x <= ScamplaceButtonSize.z &&
+         D2D::mpos.y >= ScamplaceButtonSize.y && D2D::mpos.y <= ScamplaceButtonSize.w);
 
-    auto buttonColor = UIColor(0, 0, 0, 120);
+    UIColor buttonColor(0, 0, 0, 120);
 
     if(screenName == "start_screen") {
-        float overflowX = windowsSize.x * 0.5f;
-        float overflowY = windowsSize.y * 0.5f;
-
-        float maxOffsetX = overflowX;
-        float maxOffsetY = overflowY;
-
-        float offsetX = ((smoothMousePos.x / windowsSize.x) - 0.5f) * 2.f * maxOffsetX * -1.f;
-        float offsetY = ((smoothMousePos.y / windowsSize.y) - 0.5f) * 2.f * maxOffsetY * -1.f;
-
-        Vec4<float> bigRect =
-            Vec4<float>(-overflowX + offsetX, -overflowY + offsetY,
-                        windowsSize.x + overflowX + offsetX, windowsSize.y + overflowY + offsetY);
-
-        D2D::drawImageFromUrl(bigRect,
-                                     "https://raw.githubusercontent.com/93281/tickware.sound/"
-                                     "d9487f28814fb28378e2cf5cf137f48ceb0a5eda/1047578.jpg",
-                                     "background", 1.f);
+        D2D::fillRectangle(Vec4<float>(0, 0, windowsSize.x, windowsSize.y),
+                           UIColor(255, 255, 255, 255));
 
         float time = static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(
                                             std::chrono::steady_clock::now().time_since_epoch())
                                             .count()) /
                      1000.f;
 
-        float baseX = windowsSize.x / 2.f;
-        float baseY = windowsSize.y * 0.15f;
+        float stripeWidth = 20.f;
+        float stripeSpacing = 40.f;
+        float speed = 60.f;
+        float offset = fmod(time * speed, stripeSpacing + stripeWidth);
 
-        float scaleAnim = 3.f + 0.3f * std::sin(time * 3.f);
-        float colorPulse = 0.5f + 0.5f * std::sin(time * 5.f);
+        for(float i = -windowsSize.y; i < windowsSize.x + windowsSize.y;
+            i += stripeSpacing + stripeWidth) {
+            float x1 = i + offset;
+            float y1 = 0.f;
+            float x2 = x1 - windowsSize.y;
+            float y2 = windowsSize.y;
 
-        UIColor animatedColor(static_cast<int>(255 * colorPulse),
-                              static_cast<int>(128 + 127 * colorPulse), 255, 255);
+            Vec2<float> p1(x1, y1);
+            Vec2<float> p2(x2, y2);
 
-        float textWidth = D2D::getTextWidth("Cookie") * scaleAnim;
-        float textHeight = D2D::getTextHeight("Cookie") * scaleAnim;
+            float dx = p2.x - p1.x;
+            float dy = p2.y - p1.y;
+            float len = std::sqrt(dx * dx + dy * dy);
+            float nx = -dy / len;
+            float ny = dx / len;
 
-        D2D::drawText(Vec2<float>(baseX - textWidth / 2.f, baseY - textHeight / 2.f),
-                             "Cookie", animatedColor, scaleAnim);
+            float halfWidth = stripeWidth * 0.5f;
+
+            Vec2<float> a(p1.x + nx * halfWidth, p1.y + ny * halfWidth);
+            Vec2<float> b(p1.x - nx * halfWidth, p1.y - ny * halfWidth);
+            Vec2<float> c(p2.x - nx * halfWidth, p2.y - ny * halfWidth);
+            Vec2<float> d(p2.x + nx * halfWidth, p2.y + ny * halfWidth);
+
+            fillTriangle(a, b, c, UIColor(255, 105, 180, 70));
+            fillTriangle(a, c, d, UIColor(255, 105, 180, 70));
+        }
+
+        static float fadeDuration = 1.5f;
+        static float fadeStartTime = 0.f;
+        static bool isFading = false;
+        if(currentTime - lastChangeTime > 5.f && !isFading) {
+            previousIndex = selectedIndex;
+            selectedIndex = (selectedIndex + 1) % backgroundUrls.size();
+            fadeStartTime = currentTime;
+            isFading = true;
+            lastChangeTime = currentTime;
+        }
+
+        float fadeProgress = 1.f;
+        if(isFading) {
+            fadeProgress = (currentTime - fadeStartTime) / fadeDuration;
+            if(fadeProgress >= 1.f) {
+                fadeProgress = 1.f;
+                isFading = false;
+            }
+        }
+
+        float zoomAmount = 1.07f;
+        float overflowX = windowsSize.x * (zoomAmount - 1.f) * 0.5f;
+        float overflowY = windowsSize.y * (zoomAmount - 1.f) * 0.5f;
+
+        float offsetX = ((smoothMousePos.x / windowsSize.x) - 0.5f) * overflowX * -2.f;
+        float offsetY = ((smoothMousePos.y / windowsSize.y) - 0.5f) * overflowY * -2.f;
+
+        Vec4<float> bigRect(-overflowX + offsetX, -overflowY + offsetY,
+                            windowsSize.x + overflowX + offsetX,
+                            windowsSize.y + overflowY + offsetY);
+
+        if(isFading) {
+            D2D::drawImageFromUrl(bigRect, backgroundUrls[previousIndex],
+                                  backgroundNames[previousIndex], 1.f - fadeProgress);
+            D2D::drawImageFromUrl(bigRect, backgroundUrls[selectedIndex],
+                                  backgroundNames[selectedIndex], fadeProgress);
+        } else {
+            D2D::drawImageFromUrl(bigRect, backgroundUrls[selectedIndex],
+                                  backgroundNames[selectedIndex], 1.f);
+        }
 
         D2D::fillRectangle(StartbuttonSize, buttonColor);
-        D2D::drawText(
-            Vec2<float>(windowsSize.x / 2 - D2D::getTextWidth("Start") / 2,
-                        windowsSize.y * 0.540 - D2D::getTextHeight("Start") / 2),
-            "Start", UIColor(255, 255, 255, 255), 1.f);
-        if(isInStartButtonAera) {
+        D2D::drawText(Vec2<float>(windowsSize.x / 2 - D2D::getTextWidth("Start") / 2,
+                                  (StartbuttonSize.y + StartbuttonSize.w) / 2 -
+                                      D2D::getTextHeight("Start") / 2),
+                      "Start", UIColor(255, 255, 255, 255), 1.f);
+        if(isInStartButtonAera)
             D2D::fillRectangle(StartbuttonSize, UIColor(0, 0, 0, 120));
-        }
 
         D2D::fillRectangle(SettingsButtonSize, buttonColor);
-        D2D::drawText(
-            Vec2<float>(windowsSize.x / 2 - D2D::getTextWidth("Settings") / 2,
-                        windowsSize.y * 0.611 - D2D::getTextHeight("Settings") / 2),
-            "Settings", UIColor(255, 255, 255, 255), 1.f);
-        if(isInSettingsButtonAera) {
+        D2D::drawText(Vec2<float>(windowsSize.x / 2 - D2D::getTextWidth("Settings") / 2,
+                                  (SettingsButtonSize.y + SettingsButtonSize.w) / 2 -
+                                      D2D::getTextHeight("Settings") / 2),
+                      "Settings", UIColor(255, 255, 255, 255), 1.f);
+        if(isInSettingsButtonAera)
             D2D::fillRectangle(SettingsButtonSize, UIColor(0, 0, 0, 120));
-        }
 
         D2D::fillRectangle(RealmsButtonSize, buttonColor);
-        D2D::drawText(
-            Vec2<float>(windowsSize.x / 2 - D2D::getTextWidth("Realms") / 2,
-                        windowsSize.y * 0.682 - D2D::getTextHeight("Realms") / 2),
-            "Realms", UIColor(255, 255, 255, 255), 1.f);
-        if(isInRealmsButtonAera) {
+        D2D::drawText(Vec2<float>(windowsSize.x / 2 - D2D::getTextWidth("Realms") / 2,
+                                  (RealmsButtonSize.y + RealmsButtonSize.w) / 2 -
+                                      D2D::getTextHeight("Realms") / 2),
+                      "Realms", UIColor(255, 255, 255, 255), 1.f);
+        if(isInRealmsButtonAera)
             D2D::fillRectangle(RealmsButtonSize, UIColor(0, 0, 0, 120));
-        }
 
         D2D::fillRectangle(ScamplaceButtonSize, buttonColor);
-        D2D::drawText(
-            Vec2<float>(windowsSize.x / 2 - D2D::getTextWidth("Scamplace") / 2,
-                        windowsSize.y * 0.753 - D2D::getTextHeight("Scamplace") / 2),
-            "Scamplace", UIColor(255, 255, 255, 255), 1.f);
-        if(isInScamplaceButtonAera) {
+        D2D::drawText(Vec2<float>(windowsSize.x / 2 - D2D::getTextWidth("Scamplace") / 2,
+                                  (ScamplaceButtonSize.y + ScamplaceButtonSize.w) / 2 -
+                                      D2D::getTextHeight("Scamplace") / 2),
+                      "Scamplace", UIColor(255, 255, 255, 255), 1.f);
+        if(isInScamplaceButtonAera)
             D2D::fillRectangle(ScamplaceButtonSize, UIColor(0, 0, 0, 120));
-        }
 
-        D2D::drawText(
-            Vec2<float>(5.f, windowsSize.y - D2D::getTextHeight("1.21.94") - 5.f), "1.21.94",
-            UIColor(255, 255, 255, 255), 1.f);
+        D2D::drawText(Vec2<float>(5.f, windowsSize.y - D2D::getTextHeight("1.21.94") - 5.f),
+                      "1.21.94", UIColor(255, 255, 255, 255), 1.f);
+    }
+
+    if(screenName == "start_screen") {
+        float time = static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(
+                                            std::chrono::steady_clock::now().time_since_epoch())
+                                            .count()) /
+                     1000.f;
+
+        std::string title = "CuteCore Client";
+        std::vector<UIColor> colors = {UIColor(255, 182, 193, 255), UIColor(255, 240, 245, 255),
+                                       UIColor(255, 192, 203, 255), UIColor(255, 255, 255, 255),
+                                       UIColor(255, 240, 245, 255), UIColor(255, 182, 193, 255)};
+
+        float scale = 4.f;
+        float x = windowsSize.x * 0.5f - D2D::getTextWidth(title) * scale / 2.f;
+        float y = windowsSize.y * 0.15f;
+
+        for(size_t i = 0; i < title.size(); i++) {
+            float t = fmod((float)i / title.size() + fmod(time, 3.f) / 3.f, 1.f);
+            float pos = t * (colors.size() - 1);
+            int idx1 = (int)pos;
+            int idx2 = (idx1 + 1) % colors.size();
+            float lerpVal = pos - idx1;
+
+            UIColor c1 = colors[idx1];
+            UIColor c2 = colors[idx2];
+
+            UIColor col((unsigned char)((1 - lerpVal) * c1.r + lerpVal * c2.r),
+                        (unsigned char)((1 - lerpVal) * c1.g + lerpVal * c2.g),
+                        (unsigned char)((1 - lerpVal) * c1.b + lerpVal * c2.b), 255);
+
+            std::string ch(1, title[i]);
+            float w = D2D::getTextWidth(ch) * scale;
+            D2D::drawText(Vec2<float>(x, y), ch, col, scale);
+            x += w;
+        }
     }
 }
 
 void D2D::Render() {
+    static bool seeded = false;
+    if(!seeded) {
+        auto now = std::chrono::high_resolution_clock::now();
+        auto duration = now.time_since_epoch();
+        auto nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
+        srand(static_cast<unsigned int>(nanos ^ (uintptr_t)&now));
+        seeded = true;
+    }
+
     Vec2<float> windowsSize = GI::getGuiData()->windowSizeReal;
     ModuleManager::onD2DRender();
     NotificationManager::Render();
     RenderUI();
 
-    Vec2<float> winSize =GI::getGuiData()->windowSizeReal;
+    Vec2<float> winSize = GI::getGuiData()->windowSizeReal;
     static ClickGUI* clickGuiMod = ModuleManager::getModule<ClickGUI>();
 
     {
@@ -561,170 +705,142 @@ void D2D::Render() {
         }
     }
 
-    // Modern Eject Interface
-    {
-        Vec2<float> windowSize = D2D::getWindowSize();
-        static float holdTime = 0.f;
-        static float holdAnim = 0.f;
-        static float showDuration = 0.f;
-        static float exitDuration = 0.f;
-        static float exitVelocity = 0.f;
-        static float pulseAnim = 0.f;
+    Vec2<float> windowSize = D2D::getWindowSize();
+    static float holdTime = 0.f;
+    static float holdAnim = 0.f;
+    static float showDuration = 0.f;
+    static float exitDuration = 0.f;
+    static float exitVelocity = 0.f;
+    static float pulseAnim = 0.f;
 
-        // Update pulse animation
-        pulseAnim += deltaTime * 4.f;
+    pulseAnim += deltaTime * 4.f;
 
-        if(showDuration > 0.1f) {
-            // Modern styling
-            float scale = showDuration;
-            float textSize = 0.9f * scale;
-            float padding = 20.f * scale;
-            float borderRadius = 12.f * scale;
+    if(showDuration > 0.1f) {
+        float scale = showDuration;
+        float textSize = 0.9f * scale;
+        float padding = 20.f * scale;
+        float borderRadius = 12.f * scale;
 
-            // Enhanced text with modern styling
-            static std::string mainText = "Hold Ctrl + L to eject";
-            static std::string subText = "Release to cancel";
+        static std::string mainText = "Hold Ctrl + L to eject";
+        static std::string subText = "Release to cancel";
 
-            float mainTextWidth = getTextWidth(mainText, textSize);
-            float subTextWidth = getTextWidth(subText, textSize * 0.7f);
-            float maxTextWidth = std::max(mainTextWidth, subTextWidth);
-            float mainTextHeight = getTextHeight(mainText, textSize);
-            float subTextHeight = getTextHeight(subText, textSize * 0.7f);
-            float totalHeight = mainTextHeight + subTextHeight + 8.f * scale;
+        float mainTextWidth = getTextWidth(mainText, textSize);
+        float subTextWidth = getTextWidth(subText, textSize * 0.7f);
+        float maxTextWidth = std::max(mainTextWidth, subTextWidth);
+        float mainTextHeight = getTextHeight(mainText, textSize);
+        float subTextHeight = getTextHeight(subText, textSize * 0.7f);
+        float totalHeight = mainTextHeight + subTextHeight + 8.f * scale;
 
-            // Center positioning with smooth slide-in animation
-            float slideOffset = (1.f - showDuration) * 50.f;
-            Vec2<float> panelPos =
-                Vec2<float>((windowSize.x - maxTextWidth - padding * 2) / 2.f, 50.f + slideOffset);
+        float slideOffset = (1.f - showDuration) * 50.f;
+        Vec2<float> panelPos =
+            Vec2<float>((windowSize.x - maxTextWidth - padding * 2) / 2.f, 50.f + slideOffset);
 
-            // Panel dimensions
-            Vec4<float> panelRect = Vec4<float>(panelPos.x - padding, panelPos.y - padding,
-                                                panelPos.x + maxTextWidth + padding,
-                                                panelPos.y + totalHeight + padding);
+        Vec4<float> panelRect =
+            Vec4<float>(panelPos.x - padding, panelPos.y - padding,
+                        panelPos.x + maxTextWidth + padding, panelPos.y + totalHeight + padding);
 
-            // Modern gradient background with glassmorphism effect
-            float alpha = showDuration * 0.9f;
-            UIColor bgColor1 = UIColor(30, 30, 40, (int)(220 * alpha));
-            UIColor bgColor2 = UIColor(45, 45, 60, (int)(180 * alpha));
+        float alpha = showDuration * 0.9f;
+        UIColor bgColor1 = UIColor(30, 30, 40, (int)(220 * alpha));
+        UIColor bgColor2 = UIColor(45, 45, 60, (int)(180 * alpha));
 
-            // Background with subtle gradient effect (simulated with multiple layers)
-            fillRoundedRectangle(panelRect, bgColor1, borderRadius);
+        fillRoundedRectangle(panelRect, bgColor1, borderRadius);
 
-            // Add subtle inner glow
-            Vec4<float> innerGlow =
-                Vec4<float>(panelRect.x + 1, panelRect.y + 1, panelRect.z - 1, panelRect.w - 1);
-            UIColor glowColor = UIColor(80, 120, 200, (int)(40 * alpha));
-            fillRoundedRectangle(innerGlow, glowColor, borderRadius - 1);
+        Vec4<float> innerGlow =
+            Vec4<float>(panelRect.x + 1, panelRect.y + 1, panelRect.z - 1, panelRect.w - 1);
+        UIColor glowColor = UIColor(80, 120, 200, (int)(40 * alpha));
+        fillRoundedRectangle(innerGlow, glowColor, borderRadius - 1);
 
-            // Animated border with pulse effect
-            float pulseIntensity = (sinf(pulseAnim) + 1.f) * 0.5f;
-            UIColor borderColor =
-                UIColor(100 + (int)(50 * pulseIntensity), 150 + (int)(50 * pulseIntensity), 255,
-                        (int)(150 * alpha));
-            drawRoundedRectangle(panelRect, borderColor, borderRadius, 2.f);
+        float pulseIntensity = (sinf(pulseAnim) + 1.f) * 0.5f;
+        UIColor borderColor = UIColor(100 + (int)(50 * pulseIntensity),
+                                      150 + (int)(50 * pulseIntensity), 255, (int)(150 * alpha));
+        drawRoundedRectangle(panelRect, borderColor, borderRadius, 2.f);
 
-            // Progress bar background
-            float progressBarY = panelRect.w - padding * 0.7f;
-            Vec4<float> progressBg =
-                Vec4<float>(panelRect.x + padding * 0.5f, progressBarY - 3.f * scale,
-                            panelRect.z - padding * 0.5f, progressBarY + 3.f * scale);
+        float progressBarY = panelRect.w - padding * 0.7f;
+        Vec4<float> progressBg =
+            Vec4<float>(panelRect.x + padding * 0.5f, progressBarY - 3.f * scale,
+                        panelRect.z - padding * 0.5f, progressBarY + 3.f * scale);
 
-            UIColor progressBgColor = UIColor(60, 60, 80, (int)(180 * alpha));
-            fillRoundedRectangle(progressBg, progressBgColor, 3.f * scale);
+        UIColor progressBgColor = UIColor(60, 60, 80, (int)(180 * alpha));
+        fillRoundedRectangle(progressBg, progressBgColor, 3.f * scale);
 
-            // Animated progress bar with gradient effect
-            float progressWidth = (progressBg.z - progressBg.x) * holdAnim;
-            if(progressWidth > 0) {
-                Vec4<float> progressFill = Vec4<float>(progressBg.x, progressBg.y,
-                                                       progressBg.x + progressWidth, progressBg.w);
+        float progressWidth = (progressBg.z - progressBg.x) * holdAnim;
+        if(progressWidth > 0) {
+            Vec4<float> progressFill =
+                Vec4<float>(progressBg.x, progressBg.y, progressBg.x + progressWidth, progressBg.w);
 
-                // Create gradient effect for progress bar
-                UIColor progressColor1 = UIColor(100, 200, 255, (int)(255 * alpha));
-                UIColor progressColor2 = UIColor(50, 150, 255, (int)(255 * alpha));
+            UIColor progressColor1 = UIColor(100, 200, 255, (int)(255 * alpha));
+            UIColor progressColor2 = UIColor(50, 150, 255, (int)(255 * alpha));
 
-                fillRoundedRectangle(progressFill, progressColor1, 3.f * scale);
+            fillRoundedRectangle(progressFill, progressColor1, 3.f * scale);
 
-                // Add highlight on top
-                Vec4<float> highlight = Vec4<float>(progressFill.x, progressFill.y, progressFill.z,
-                                                    progressFill.y + 2.f * scale);
-                UIColor highlightColor = UIColor(150, 220, 255, (int)(100 * alpha));
-                fillRoundedRectangle(highlight, highlightColor, 3.f * scale);
-            }
+            Vec4<float> highlight = Vec4<float>(progressFill.x, progressFill.y, progressFill.z,
+                                                progressFill.y + 2.f * scale);
+            UIColor highlightColor = UIColor(150, 220, 255, (int)(100 * alpha));
+            fillRoundedRectangle(highlight, highlightColor, 3.f * scale);
+        }
 
-            // Main text with enhanced styling
-            Vec2<float> mainTextPos =
-                Vec2<float>(panelPos.x + (maxTextWidth - mainTextWidth) / 2.f, panelPos.y);
+        Vec2<float> mainTextPos =
+            Vec2<float>(panelPos.x + (maxTextWidth - mainTextWidth) / 2.f, panelPos.y);
 
-            // Text shadow for depth
-            drawText(Vec2<float>(mainTextPos.x + 1, mainTextPos.y + 1), mainText,
-                     UIColor(0, 0, 0, (int)(120 * alpha)), textSize);
+        drawText(Vec2<float>(mainTextPos.x + 1, mainTextPos.y + 1), mainText,
+                 UIColor(0, 0, 0, (int)(120 * alpha)), textSize);
 
-            // Main text with subtle color animation
-            float textColorCycle = (sinf(pulseAnim * 0.8f) + 1.f) * 0.5f;
-            UIColor mainTextColor =
-                UIColor(220 + (int)(35 * textColorCycle), 230 + (int)(25 * textColorCycle), 255,
-                        (int)(255 * alpha));
-            drawText(mainTextPos, mainText, mainTextColor, textSize);
+        float textColorCycle = (sinf(pulseAnim * 0.8f) + 1.f) * 0.5f;
+        UIColor mainTextColor = UIColor(220 + (int)(35 * textColorCycle),
+                                        230 + (int)(25 * textColorCycle), 255, (int)(255 * alpha));
+        drawText(mainTextPos, mainText, mainTextColor, textSize);
 
-            // Subtitle text
-            Vec2<float> subTextPos = Vec2<float>(panelPos.x + (maxTextWidth - subTextWidth) / 2.f,
-                                                 mainTextPos.y + mainTextHeight + 8.f * scale);
+        Vec2<float> subTextPos = Vec2<float>(panelPos.x + (maxTextWidth - subTextWidth) / 2.f,
+                                             mainTextPos.y + mainTextHeight + 8.f * scale);
 
-            UIColor subTextColor = UIColor(160, 170, 190, (int)(200 * alpha));
-            drawText(subTextPos, subText, subTextColor, textSize * 0.7f);
+        UIColor subTextColor = UIColor(160, 170, 190, (int)(200 * alpha));
+        drawText(subTextPos, subText, subTextColor, textSize * 0.7f);
 
-            // Animated particles effect around the panel
-            if(holdAnim > 0.1f) {
-                for(int i = 0; i < 6; i++) {
-                    float angle = (pulseAnim + i * 1.047f) * 0.5f;  // 60 degrees apart
-                    float distance = 30.f + sinf(pulseAnim + i) * 8.f;
-                    float particleX = (panelRect.x + panelRect.z) / 2.f + cosf(angle) * distance;
-                    float particleY = (panelRect.y + panelRect.w) / 2.f + sinf(angle) * distance;
+        if(holdAnim > 0.1f) {
+            for(int i = 0; i < 6; i++) {
+                float angle = (pulseAnim + i * 1.047f) * 0.5f;
+                float distance = 30.f + sinf(pulseAnim + i) * 8.f;
+                float particleX = (panelRect.x + panelRect.z) / 2.f + cosf(angle) * distance;
+                float particleY = (panelRect.y + panelRect.w) / 2.f + sinf(angle) * distance;
 
-                    float particleAlpha = holdAnim * (sinf(pulseAnim * 2.f + i) + 1.f) * 0.5f;
-                    UIColor particleColor = UIColor(100, 150, 255, (int)(80 * particleAlpha));
-                    fillCircle(Vec2<float>(particleX, particleY), particleColor, 2.f * scale);
-                }
+                float particleAlpha = holdAnim * (sinf(pulseAnim * 2.f + i) + 1.f) * 0.5f;
+                UIColor particleColor = UIColor(100, 150, 255, (int)(80 * particleAlpha));
+                fillCircle(Vec2<float>(particleX, particleY), particleColor, 2.f * scale);
             }
         }
+    }
 
-        // Input handling
-        if(GI::isKeyDown(VK_CONTROL) &&GI::isKeyDown('L')) {
-            holdTime += D2D::deltaTime;
-            if(holdTime > 1.f)
-                holdTime = 1.f;
-            exitDuration = 2.f;  // Extended duration for better UX
-        } else {
-            holdTime = 0.f;
-            exitDuration -= D2D::deltaTime;
-        }
+    if(GI::isKeyDown(VK_CONTROL) && GI::isKeyDown('L')) {
+        holdTime += D2D::deltaTime;
+        if(holdTime > 1.f)
+            holdTime = 1.f;
+        exitDuration = 2.f;
+    } else {
+        holdTime = 0.f;
+        exitDuration -= D2D::deltaTime;
+    }
 
-        // Smooth animations
-        holdAnim += (holdTime - holdAnim) * (D2D::deltaTime * 8.f);
-        if(holdAnim > 1.f)
-            holdAnim = 1.f;
-        if(holdAnim < 0.f)
-            holdAnim = 0.f;
+    holdAnim += (holdTime - holdAnim) * (D2D::deltaTime * 8.f);
+    if(holdAnim > 1.f)
+        holdAnim = 1.f;
+    if(holdAnim < 0.f)
+        holdAnim = 0.f;
 
-        if(exitDuration > 0.f) {
-            showDuration += (1.f - showDuration) * (D2D::deltaTime * 6.f);
-            exitVelocity = 0.f;
-        } else {
-            showDuration -= exitVelocity;
-            exitVelocity += D2D::deltaTime / 3.f;
-        }
+    if(exitDuration > 0.f) {
+        showDuration += (1.f - showDuration) * (D2D::deltaTime * 6.f);
+        exitVelocity = 0.f;
+    } else {
+        showDuration -= exitVelocity;
+        exitVelocity += D2D::deltaTime / 3.f;
+    }
 
-        if(showDuration < 0.f)
-            showDuration = 0.f;
-        if(showDuration > 1.f)
-            showDuration = 1.f;
+    if(showDuration < 0.f)
+        showDuration = 0.f;
+    if(showDuration > 1.f)
+        showDuration = 1.f;
 
-        // Eject when progress is complete
-        if(holdAnim > 0.99f) {
-            // if (auto chatMod = ModuleManager::getModule<ChatModule>()) {
-            //	if (chatMod->isEnabled()) chatMod->forceDisable()
-            Client::shutdown();
-        }
+    if(holdAnim > 0.99f) {
+        Client::shutdown();
     }
 }
 
@@ -976,7 +1092,7 @@ ID2D1SolidColorBrush* getSolidColorBrush(const UIColor& color) {
     return colorBrushCache[colorBrushKey].get();
 }
 
-void D2D::drawImage(const Vec4<float>& rect, const std::string& url) {
+void D2D::drawImage(const Vec4<float>& rect, const std::string& url, float opacity) {
     D2D_CTX_GUARD();
     if(!d2dDeviceContext)
         return;
@@ -988,10 +1104,11 @@ void D2D::drawImage(const Vec4<float>& rect, const std::string& url) {
     D2D1_RECT_F dest = D2D1::RectF(rect.x, rect.y, rect.z, rect.w);
     D2D1_SIZE_F size = bmp->GetSize();
     D2D1_RECT_F src = D2D1::RectF(0, 0, size.width, size.height);
-    float opacity = 1.0f;
+
     d2dDeviceContext->DrawBitmap(bmp.get(), dest, opacity, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
                                  src);
 }
+
 
 // Icon helpers
 void D2D::drawTriangle(const Vec4<float>& rect, const UIColor& color, bool leftDirection,
@@ -1791,9 +1908,13 @@ bool D2D::isValidImageUrl(const std::string& url) {
 }
 
 // 绘制占位符
-void D2D::drawPlaceholder(const Vec4<float>& rect, const std::string& text) {
-    fillRectangle(rect, UIColor(64, 64, 64, 100));
-    drawRectangle(rect, UIColor(128, 128, 128, 150), 1.0f);
+void D2D::drawPlaceholder(const Vec4<float>& rect, const std::string& text, float opacity) {
+    auto applyOpacity = [opacity](unsigned char c) -> unsigned char {
+        return static_cast<unsigned char>(c * opacity);
+    };
+
+    fillRectangle(rect, UIColor(64, 64, 64, applyOpacity(100)));
+    drawRectangle(rect, UIColor(128, 128, 128, applyOpacity(150)), 1.0f);
 
     float textSize = 1.0f;
     float textWidth = getTextWidth(text, textSize);
@@ -1802,53 +1923,49 @@ void D2D::drawPlaceholder(const Vec4<float>& rect, const std::string& text) {
     Vec2<float> textPos(rect.x + (rect.z - rect.x - textWidth) / 2.0f,
                         rect.y + (rect.w - rect.y - textHeight) / 2.0f);
 
-    drawText(textPos, text, UIColor(200, 200, 200, 200), textSize);
+    drawText(textPos, text, UIColor(200, 200, 200, applyOpacity(200)), textSize);
 }
 
 
+
 void D2D::drawImageFromUrl(const Vec4<float>& rect, const std::string& url,
-                                  const std::string& customName, float opacity) {
+                           const std::string& customName, float opacity) {
     D2D_CTX_GUARD();
 
     if(url.empty()) {
         return;
     }
 
-    // 添加URL验证
     if(!isValidImageUrl(url)) {
-      
-        drawPlaceholder(rect, "Invalid URL");
+        drawPlaceholder(rect, "Invalid URL", opacity);
         return;
     }
 
     std::string localImagePath;
 
-    // 1. 检查内存缓存
     auto cacheIt = imageCacheMap.find(url);
     if(cacheIt != imageCacheMap.end()) {
         localImagePath = cacheIt->second;
         if(std::filesystem::exists(localImagePath) && isValidCachedImage(localImagePath)) {
-            drawImage(rect, localImagePath);
+            drawImage(rect, localImagePath, opacity);
             return;
         } else {
             imageCacheMap.erase(cacheIt);
         }
     }
 
-    // 2. 检查本地文件
     std::string fileName = generateImageFileName(url, customName);
     std::string fullPath = FileUtil::getClientPath() + "Images\\" + fileName;
     if(isValidCachedImage(fullPath)) {
         imageCacheMap[url] = fullPath;
-        drawImage(rect, fullPath);
+        drawImage(rect, fullPath, opacity);
         return;
     }
 
-    // 3. 尝试下载
     static std::set<std::string> downloadingUrls;
 
     if(failedUrls.find(url) != failedUrls.end()) {
-        drawPlaceholder(rect, "Load Failed");
+        drawPlaceholder(rect, "Load Failed", opacity);
         return;
     }
 
@@ -1864,7 +1981,7 @@ void D2D::drawImageFromUrl(const Vec4<float>& rect, const std::string& url,
         }).detach();
     }
 
-    drawPlaceholder(rect, "Loading...");
+    drawPlaceholder(rect, "Loading...", opacity);
 }
 
 // 清理损坏的图片缓存
@@ -1937,14 +2054,11 @@ void D2D::clearFailureRecords() {
     failureCount.clear();
 }
 
-void D2D::drawImageFromCache(const Vec4<float>& rect, const std::string& imageName,
-                                    float opacity) {
+void D2D::drawImageFromCache(const Vec4<float>& rect, const std::string& imageName, float opacity) {
     D2D_CTX_GUARD();
 
-    // 尝试从文件名直接加载
     std::string fullPath = FileUtil::getClientPath() + "Images\\" + imageName;
 
-    // 如果没有扩展名，尝试常见的图片格式
     if(fullPath.find('.') == std::string::npos) {
         std::vector<std::string> extensions = {".png", ".jpg", ".jpeg", ".gif", ".webp"};
         bool found = false;
@@ -1957,15 +2071,15 @@ void D2D::drawImageFromCache(const Vec4<float>& rect, const std::string& imageNa
             }
         }
         if(!found) {
-            drawPlaceholder(rect, "Not Found");
+            drawPlaceholder(rect, "Not Found", 1.f);
             return;
         }
     }
 
     if(std::filesystem::exists(fullPath) && isValidCachedImage(fullPath)) {
-        drawImage(rect, fullPath);
+        drawImage(rect, fullPath, 1.f);
     } else {
-        drawPlaceholder(rect, "Invalid Cache");
+        drawPlaceholder(rect, "Invalid Cache", 1.f);
     }
 }
 
@@ -2016,11 +2130,11 @@ void D2D::addShadow(const Vec4<float>& rect, float strength, const UIColor& shad
                                        &holeMaskBitmap);
 
         d2dDeviceContext->SetTarget(holeMaskBitmap);
-        d2dDeviceContext->Clear(D2D1::ColorF(1, 1, 1, 1));  // 白色背景
+        d2dDeviceContext->Clear(D2D1::ColorF(1.f, 1.f, 1.f, 1.f));  // 白色背景
 
         // 创建透明画刷来"挖洞"
         ID2D1SolidColorBrush* transparentBrush = nullptr;
-        d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(0.0f, 0.0f, 0.0f, 0.0f),
+        d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(0.0f, 0.0f, 0.0f, 1.0f),
                                                 &transparentBrush);
 
         // 保存原始混合模式

@@ -13,7 +13,7 @@ Arraylist::Arraylist() : Module("Arraylist", "Display module enabled", Category:
         new SliderSetting<float>("Size", "Control the size of modules", &size, 1.f, 0.1f, 2.0f));
     registerSetting(new BoolSetting("Outline", "NULL", &outline, false));
     registerSetting(new EnumSetting("Outline Mode", "NULL", {"Normal", "SideLine"}, &Enum2, 0));
-    registerSetting(new SliderSetting<int>("Opacity", "NULL", &opacity, 130, 0, 255));
+    registerSetting(new SliderSetting<int>("Opacity", "NULL", &opacity, 130, 0, 255));//
     registerSetting(new SliderSetting<int>("Offset", "NULL", &offset, 10, 0, 30));
 }
 

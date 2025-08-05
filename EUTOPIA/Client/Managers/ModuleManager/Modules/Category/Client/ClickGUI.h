@@ -29,6 +29,11 @@ class ClickGUI : public Module {
     bool isRightClickDown = false;
     bool isHoldingRightClick = false;
 
+        /*rounding*/
+     float rounding = 8.0f;
+     float rounding2 = 4.0f;
+     float windowShadowStrength = 32.0f;
+
     ClickWindow* draggingWindowPtr = nullptr;
 
     KeybindSetting* capturingKbSettingPtr = nullptr;
@@ -37,7 +42,8 @@ class ClickGUI : public Module {
     void updateSelectedAnimRect(Vec4<float>& rect, float& anim);
 
    private:
-    UIColor mainColor = UIColor(115, 135, 255, 125);  // 135
+    UIColor mainColor = UIColor(255, 255, 255, 255);  // 135
+    UIColor headerColor = UIColor(150, 150, 150, 255);
     float blurStrength = 5.f;
     bool showDescription = true;
 

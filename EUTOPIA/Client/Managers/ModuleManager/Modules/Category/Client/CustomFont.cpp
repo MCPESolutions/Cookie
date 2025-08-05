@@ -1,8 +1,8 @@
 #include "CustomFont.h"
 
 CustomFont::CustomFont() : Module("Fonts", "Font of Client", Category::CLIENT) {
-    fontEnumSetting = (EnumSetting*)registerSetting(new EnumSetting("Font", "NULL", {"Arial", "Bahnschrift", "Verdana"}, &fontMode, 1));
-	registerSetting(new SliderSetting<int>("FontSize", "NULL", &fontSize, 29, 15, 40));
+    fontEnumSetting = (EnumSetting*)registerSetting(new EnumSetting("Font", "NULL", {"Arial", "Bahnschrift", "Verdana"}, &fontMode, 2));
+	registerSetting(new SliderSetting<int>("FontSize", "NULL", &fontSize, 21, 15, 40));
 	registerSetting(new BoolSetting("Italic", "NULL", &italic, false));
 	registerSetting(new BoolSetting("Shadow", "NULL", &shadow, true));
 }

@@ -152,7 +152,7 @@ void KillAura::onNormalTick(LocalPlayer* player) {
 
     std::sort(targetList.begin(), targetList.end(), compareDist);
 
-    if(rotMode == 1) {
+    if(rotMode == 1 || rotMode == 2) {
         Vec3<float> targetPos = targetList[0]->getEyePos();
         rotAngle = player->getEyePos().CalcAngle(targetPos);
         shouldRotate = true;
@@ -192,4 +192,18 @@ void KillAura::onUpdateRotation(LocalPlayer* player) {
         head->mHeadRot = rotAngle.y;
     if(body)
         body->yBodyRot = rotAngle.y;
+}
+
+void KillAura::onSendPacket(Packet* packet) {
+    if(!packet)
+        return;
+    if(!shouldRotate || rotMode == 0)
+        return;
+
+    if(packet->getId() == PacketID::PlayerAuthInput) {
+        auto paip = static_cast<PlayerAuthInputPacket*>(packet);
+        if(paip) {
+            paip->mRot = rotAngle;
+        }
+    }
 }

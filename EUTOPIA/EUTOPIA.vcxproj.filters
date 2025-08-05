@@ -91,6 +91,10 @@
     <ClCompile Include="Client\Managers\HooksManager\Hooks\World\Actor\ActorModelHook.cpp" />
     <ClCompile Include="Client\Managers\ModuleManager\Modules\Category\Render\GlintColor.cpp" />
     <ClCompile Include="Client\Managers\ModuleManager\Modules\Category\World\AirPlace.cpp" />
+    <ClCompile Include="Client\Managers\ModuleManager\Modules\Category\Movement\BunnyHop.cpp" />
+    <ClCompile Include="Client\Managers\ModuleManager\Modules\Category\Movement\AutoSprint.cpp" />
+    <ClCompile Include="SDK\World\Level\Level.cpp" />
+    <ClCompile Include="Client\Managers\ModuleManager\Modules\Category\Client\0x81.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client\Client.h" />
@@ -766,6 +770,10 @@
     <ClInclude Include="Client\Managers\HooksManager\Hooks\World\Actor\ActorModel.h" />
     <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Render\GlintColor.h" />
     <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\World\AirPlace.h" />
+    <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Movement\BunnyHop.h" />
+    <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Movement\AutoSprint.h" />
+    <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Client\0x92.h" />
+    <ClInclude Include="Client\Managers\ModuleManager\Modules\Category\Client\xorstr.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="Libs\libhat\libhat.lib" />

@@ -5,7 +5,8 @@ void ModuleManager::init() {
 	//Client
 	moduleList.push_back(new Arraylist());
 	moduleList.push_back(new ClickGUI());
-	moduleList.push_back(new HUD());
+    moduleList.push_back(new Ox92());
+    moduleList.push_back(new HUD());
 	moduleList.push_back(new CustomFont());
 
 	//World
@@ -19,8 +20,10 @@ void ModuleManager::init() {
     moduleList.push_back(new Reach());
 
 	//Movement
-	moduleList.push_back(new Velocity());
-	moduleList.push_back(new NoSlow());
+    moduleList.push_back(new Velocity());
+    moduleList.push_back(new NoSlow());
+	moduleList.push_back(new AutoSprint());
+    moduleList.push_back(new BunnyHop());
     moduleList.push_back(new Fly());
     moduleList.push_back(new Phase());
 
